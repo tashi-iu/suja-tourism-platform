@@ -1,6 +1,6 @@
 # Tourism Platform
 
-Deployed Site: [suja.netlify.app](https://suja.netlify.app)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/08ee0e5f-d3fe-45ce-bde4-c978647c4e06/deploy-status)](https://app.netlify.com/sites/suja/deploys)
 
 ---
 
