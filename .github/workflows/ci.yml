@@ -1,0 +1,22 @@
+name: Continous Integration
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    env:
+      REMIX_TOKEN: ${{ secrets.REMIX_AUTH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      - run: "npm install"
+      - run: "npm run lint"
+      - run: "npm run typecheck"
