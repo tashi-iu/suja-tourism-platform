@@ -1,13 +1,11 @@
-import { useEffect } from "react";
-
 import type { ActionFunction } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
+import { useFetcher, useSearchParams } from "@remix-run/react";
+import type { Session } from "@supabase/supabase-js";
+import { useEffect } from "react";
 import { supabaseClient } from "~/services/supabase.client";
 import { authCookie } from "~/services/supabase.server";
-
-import type { Session } from "@supabase/supabase-js";
 import { setAuthSession } from "~/session.server";
-import { useFetcher, useSearchParams } from "@remix-run/react";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
@@ -43,12 +41,12 @@ export default function AuthCallback() {
       formData.append("redirectTo", searchParams.get("redirectTo") || "/");
 
       fetcher.submit(formData, { method: "post" });
-    }, 2000);
+    }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher]);
 
   return (
-    <div className="flex animate-pulse items-center justify-center">
+    <div className="flex animate-pulse items-center justify-center p-4">
       Please hang on while we sign you in...
     </div>
   );
