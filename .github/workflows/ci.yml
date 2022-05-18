@@ -9,8 +9,6 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env:
-      REMIX_TOKEN: ${{ secrets.REMIX_AUTH_TOKEN }}
 
     steps:
       - uses: actions/checkout@v2
