@@ -1,12 +1,8 @@
-import type { SupabaseError } from "~/services/supabase.server";
-import { supabaseAdmin } from "~/services/supabase.server";
-
-import type { User } from "@supabase/supabase-js";
 import type { Session } from "@remix-run/node";
-
-import { authCookie } from "~/services/supabase.server";
-
 import { redirect } from "@remix-run/node";
+import type { User } from "@supabase/supabase-js";
+import type { SupabaseError } from "~/services/supabase.server";
+import { authCookie, supabaseAdmin } from "~/services/supabase.server";
 
 export async function setSBAuth(session: Session): Promise<void> {
   const userAccessToken = session.get("access_token");
@@ -114,7 +110,23 @@ export async function getUserByAccessToken(
   }
 }
 
-export async function getOptionalUser(request: Request): Promise<User | null> {
+export async function getOptionalSessionUser(
+  request: Request
+): Promise<User | null> {
+  try {
+    const { user, error } = await getSessionUser(request);
+
+    if (!user || error) return null;
+
+    return user;
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getSessionUser(request: Request): Promise<GetUserReturn> {
+  const noUserError = "Could not get current user";
+
   try {
     let session = await authCookie.getSession(request.headers.get("Cookie"));
 
@@ -124,7 +136,7 @@ export async function getOptionalUser(request: Request): Promise<User | null> {
         session
       );
       if (error || !accessToken || !refreshToken) {
-        return null;
+        return { error: error ?? noUserError };
       }
       session = setAuthSession(session, accessToken, refreshToken);
     }
@@ -134,12 +146,12 @@ export async function getOptionalUser(request: Request): Promise<User | null> {
     );
 
     if (accessTokenError || !user || !user.email || !user.id) {
-      return null;
+      return { error: accessTokenError ?? noUserError };
     }
 
-    return user;
+    return { user };
   } catch (error) {
-    return null;
+    return { error: typeof error === "string" ? error : noUserError };
   }
 }
 

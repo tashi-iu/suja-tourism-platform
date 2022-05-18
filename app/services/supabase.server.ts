@@ -8,8 +8,8 @@ if (!process.env.SUPABASE_URL) {
   throw new Error("SUPABASE_URL is required");
 }
 
-if (!process.env.SUPABASE_ANON_KEY) {
-  throw new Error("SUPABASE_ANON_KEY is required");
+if (!process.env.SUPABASE_SECRET_KEY) {
+  throw new Error("SUPABASE_SECRET_KEY is required");
 }
 
 if (!process.env.SESSION_SECRET) {
@@ -25,7 +25,7 @@ const supabaseOptions: SupabaseClientOptions = {
 };
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SECRET_KEY;
 
 export const supabaseAdmin = createClient(
   supabaseUrl,
