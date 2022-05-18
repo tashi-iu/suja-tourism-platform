@@ -6,20 +6,34 @@
 
 ## Development
 
+### Prerequisites
+
+- [Node.js 14+](https://nodejs.org/en/download/)
+- [Netlify Account](https://www.netlify.com)
+- [Supabase CLI](https://supabase.com/docs/guides/local-development)
+- [Docker](https://www.docker.com/products/docker-desktop)
+
 - Install dependencies:
 
   ```sh
   npm install
   ```
 
-- Connect to Netlify
+- Initialize Netlify
 
   ```sh
   npx netlify init
   ```
 
+- Initialize Supabase
+
+  ```sh
+  supabase init
+  ```
+
 - Start dev server:
 
   ```sh
+  supabase start
   npm run dev
   ```
