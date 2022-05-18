@@ -1,34 +1,86 @@
-import type { LoaderFunction } from "@remix-run/node";
+import type { ActionFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
+import { useCallback, useEffect, useState } from "react";
+import CreatePost from "~/components/posts/CreatePost";
+import PostListItemCard from "~/components/posts/PostListItemCard";
 import type { Post } from "~/models/post.server";
-import { getPostListItems } from "~/models/post.server";
+import { getPosts } from "~/models/post.server";
+import { useOptionalUser, useScrolledToBottom } from "~/utils";
 
-type LoaderData = {
+type ActionData = {
   posts: Post[];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const posts = await getPostListItems();
+export const action: ActionFunction = async ({ request }) => {
+  const formData = await request.formData();
+  const posts = await getPosts({
+    page: +(formData.get("page") ?? 0),
+  });
   return json({ posts });
 };
 
 export default function Posts() {
-  const { posts } = useLoaderData<LoaderData>();
+  const fetcher = useFetcher<ActionData>();
+  const user = useOptionalUser();
+
+  const hasUser = user?.aud === "authenticated";
+
+  const [page, setPage] = useState(0);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [hasReachedEndOfPosts, setHasReachedEndOfPosts] = useState(false);
+
+  const fetchPosts = useCallback(() => {
+    if (fetcher.state !== "idle" || hasReachedEndOfPosts) return;
+    const pageQuery = new FormData();
+    pageQuery.append("page", page.toString());
+    fetcher.submit(pageQuery, {
+      method: "post",
+    });
+    setPage((page) => page + 1);
+  }, [fetcher, hasReachedEndOfPosts, page]);
+
+  useEffect(() => {
+    fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!(fetcher.type === "done" && fetcher.state === "idle" && fetcher.data))
+      return;
+
+    if (fetcher.data.posts.length === 0) {
+      setHasReachedEndOfPosts(true);
+    }
+    setPosts((posts) => [...posts, ...fetcher.data.posts]);
+  }, [fetcher]);
+
+  useScrolledToBottom(fetchPosts);
+
   return (
-    <div className="grid flex-1 grid-flow-col grid-rows-1 p-4 md:grid-rows-3">
-      {posts?.length ? (
-        posts.map((post) => (
-          <div
-            key={`post-${post.id}`}
-            className={`rounded bg-[url('${post.image_url}')]`}
-          >
-            <p>{post.title}</p>
-          </div>
-        ))
-      ) : (
-        <div>There are no posts at the moment.</div>
-      )}
+    <div className="p-4">
+      <div>
+        {hasUser ? (
+          <fetcher.Form method="post" action="/create">
+            <CreatePost userAvatarUrl={user?.user_metadata.avatar_url} />
+          </fetcher.Form>
+        ) : null}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-8 py-8">
+        {posts.length ? (
+          posts.map((post) => <PostListItemCard key={post.id} post={post} />)
+        ) : (
+          <div>There are no posts at the moment.</div>
+        )}
+        <div
+          className={`flex items-center justify-center transition duration-150 ease-in-out ${
+            fetcher.state === "idle" ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <p className="animate-pulse">Loading...</p>
+        </div>
+      </div>
     </div>
   );
 }
