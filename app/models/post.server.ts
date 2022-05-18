@@ -1,43 +1,60 @@
 import type { User } from "@supabase/supabase-js";
 import { supabaseAdmin } from "~/services/supabase.server";
+import type { Profile } from "./profile.server";
 
 export type Post = {
   id: string;
-  title: string;
   body: string;
-  image_url: string;
+  image_urls: string[];
+  created_at: Date;
+  updated_at: Date;
   profile_id: string;
+  creator: Pick<Profile, "name"> & Pick<Profile, "avatar_url">;
 };
 
-export async function getPostListItems(
-  clientQuery: { userId?: User["id"] } = {}
+export async function getPosts(
+  clientQuery: { userId?: User["id"]; page?: number } = {}
 ) {
-  const query = supabaseAdmin.from<Post>("posts").select("id, title");
+  const query = supabaseAdmin.from<Post>("posts").select(`
+      id,
+      body,
+      creator:profiles ( name, avatar_url )
+    `);
 
   if (clientQuery.userId) {
     query.eq("profile_id", clientQuery.userId);
   }
 
-  const { data } = await query;
+  query.range(
+    clientQuery.page ? 10 * clientQuery.page : 0,
+    clientQuery.page ? 10 * clientQuery.page + 10 : 10
+  );
+
+  const { data } = await query.limit(15).order("created_at", {
+    ascending: false,
+  });
 
   return data;
 }
 
 export async function createPost({
-  title,
   body,
   userId,
-}: Pick<Post, "body" | "title"> & { userId: User["id"] }) {
+  imageUrls,
+}: Pick<Post, "body"> & { userId: User["id"]; imageUrls?: string[] }): Promise<{
+  post?: Post;
+  error?: string;
+}> {
   const { data, error } = await supabaseAdmin
     .from("posts")
-    .insert([{ title, body, profile_id: userId }])
+    .insert([{ body, profile_id: userId, image_urls: imageUrls ?? [] }])
     .single();
 
   if (!error) {
     return data;
   }
 
-  return null;
+  return { error: error.message };
 }
 
 export async function deletePost({
