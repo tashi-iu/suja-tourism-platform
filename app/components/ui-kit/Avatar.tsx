@@ -9,9 +9,11 @@ export default function Avatar({ src, alt, size }: AvatarProps) {
     <img
       src={src}
       alt={alt}
-      className={`
-  ${size ? "h-" + size + " w-" + size : ""} rounded-full
-  `}
+      style={{
+        height: size,
+        width: size,
+      }}
+      className={`rounded-full`}
     />
   );
 }
