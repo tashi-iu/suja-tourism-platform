@@ -67,7 +67,7 @@ export default function Posts() {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 py-2 md:gap-8 md:py-8">
+      <div className="flex flex-1 flex-col gap-4 py-4 md:gap-8 md:py-8">
         {fetcher.type === "done" ? (
           posts.length ? (
             posts.map((post) => (

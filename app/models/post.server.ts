@@ -18,7 +18,7 @@ export async function getPosts(
   const query = supabaseAdmin.from<Post>("posts").select(`
       id,
       body,
-      creator:profiles
+      creator:profiles (id, name, avatar_url)
     `);
 
   if (clientQuery.userId) {
@@ -30,7 +30,7 @@ export async function getPosts(
     clientQuery.page ? 10 * clientQuery.page + 10 : 10
   );
 
-  const { data } = await query.limit(15).order("created_at", {
+  const { data } = await query.order("created_at", {
     ascending: false,
   });
 
