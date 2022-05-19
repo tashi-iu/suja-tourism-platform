@@ -1,6 +1,7 @@
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
-import { BiDotsVerticalRounded, BiShareAlt } from "react-icons/bi";
+import { BiCodeAlt, BiDotsVerticalRounded, BiShareAlt } from "react-icons/bi";
 import { FaLaughSquint } from "react-icons/fa";
+import { MdBlock, MdDelete, MdReport } from "react-icons/md";
 import { RiReplyLine, RiStarLine } from "react-icons/ri";
 import type { Post } from "~/models/post.server";
 import Avatar from "../ui-kit/Avatar";
@@ -15,10 +16,12 @@ const reactions = {
 
 type PostListItemCardProps = {
   post: Post;
+  isSelfPost: boolean;
+  isAuthenticated: boolean;
 };
 
 export default function PostListItemCard(props: PostListItemCardProps) {
-  const { post } = props;
+  const { post, isSelfPost, isAuthenticated } = props;
   return (
     <div
       key={`post-${post.id}`}
@@ -35,44 +38,69 @@ export default function PostListItemCard(props: PostListItemCardProps) {
         <p className="font-semibold text-slate-400/90">{post.creator.name}</p>
         <p className="text-slate-300/80">{post.body}</p>
         <div className="flex items-center justify-between pt-1">
-          <div className="flex flex-1">
-            <IconButton
-              icon={reactions.none}
-              size={24}
-              onClick={() => {}}
-              title="React"
-            />
-          </div>
-          <div className="flex flex-1">
-            <IconButton
-              icon={RiStarLine}
-              size={24}
-              onClick={() => {}}
-              title="Star"
-            />
-          </div>
-          <div className="flex flex-1">
-            <IconButton
-              icon={RiReplyLine}
-              size={24}
-              onClick={() => {}}
-              title="Reply"
-            />
-          </div>
-          <div className="flex flex-1">
-            <IconButton
-              icon={BiShareAlt}
-              size={24}
-              onClick={() => {}}
-              title="Share"
-            />
-          </div>
+          <IconButton
+            icon={reactions.none}
+            size={24}
+            onClick={() => {}}
+            title="React"
+          />
+          <IconButton
+            icon={RiStarLine}
+            size={24}
+            onClick={() => {}}
+            title="Star"
+          />
+          <IconButton
+            icon={RiReplyLine}
+            size={24}
+            onClick={() => {}}
+            title="Reply"
+          />
+          <IconButton
+            icon={BiShareAlt}
+            size={24}
+            onClick={() => {}}
+            title="Share"
+          />
         </div>
       </div>
       <div className="pt-1">
-        <DropdownMenu items={[]}>
-          <IconButton
-            icon={BiDotsVerticalRounded}
+        <DropdownMenu
+          items={[
+            ...(isAuthenticated
+              ? isSelfPost
+                ? [
+                    {
+                      key: "delete",
+                      label: "Delete",
+                      onClick: () => {},
+                      icon: MdDelete,
+                    },
+                  ]
+                : [
+                    {
+                      key: "block",
+                      label: `Block ${post.creator.name}`,
+                      onClick: () => {},
+                      icon: MdBlock,
+                    },
+                    {
+                      key: "report",
+                      label: "Report this post",
+                      onClick: () => {},
+                      icon: MdReport,
+                    },
+                  ]
+              : []),
+            {
+              key: "embed",
+              label: "Embed",
+              onClick: () => {},
+              icon: BiCodeAlt,
+            },
+          ]}
+        >
+          <BiDotsVerticalRounded
             onClick={() => {
               //TODO
             }}

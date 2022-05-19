@@ -49,7 +49,7 @@ export default function Posts() {
     if (!(fetcher.type === "done" && fetcher.state === "idle" && fetcher.data))
       return;
 
-    if (fetcher.data.posts.length === 0) {
+    if (!fetcher.data.posts || fetcher.data.posts?.length === 0) {
       setHasReachedEndOfPosts(true);
     }
     setPosts((posts) => [...posts, ...fetcher.data.posts]);
@@ -67,12 +67,21 @@ export default function Posts() {
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col gap-8 py-8">
-        {posts.length ? (
-          posts.map((post) => <PostListItemCard key={post.id} post={post} />)
-        ) : (
-          <div>There are no posts at the moment.</div>
-        )}
+      <div className="flex flex-1 flex-col gap-4 py-2 md:gap-8 md:py-8">
+        {posts ? (
+          posts.length ? (
+            posts.map((post) => (
+              <PostListItemCard
+                key={post.id}
+                post={post}
+                isAuthenticated={hasUser}
+                isSelfPost={post.creator.id === user?.id}
+              />
+            ))
+          ) : (
+            <div>There are no posts at the moment.</div>
+          )
+        ) : null}
         <div
           className={`flex items-center justify-center transition duration-150 ease-in-out ${
             fetcher.state === "idle" ? "opacity-0" : "opacity-100"
