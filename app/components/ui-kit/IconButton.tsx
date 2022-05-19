@@ -11,7 +11,7 @@ type IconButtonProps = {
 export default function IconButton(props: IconButtonProps) {
   return (
     <div
-      className="cursor-pointer rounded-full p-1 hover:bg-slate-600/20"
+      className="cursor-pointer rounded-full p-1 hover:bg-slate-500/10"
       onClick={props.onClick}
       title={props.title}
     >
