@@ -52,7 +52,7 @@ export default function Posts() {
     if (!fetcher.data.posts || fetcher.data.posts?.length === 0) {
       setHasReachedEndOfPosts(true);
     }
-    setPosts((posts) => [...posts, ...fetcher.data.posts]);
+    setPosts((posts) => [...posts, ...(fetcher.data.posts ?? [])]);
   }, [fetcher]);
 
   useScrolledToBottom(fetchPosts);
