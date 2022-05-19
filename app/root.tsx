@@ -1,7 +1,7 @@
 import type {
   LinksFunction,
   LoaderFunction,
-  MetaFunction,
+  MetaFunction
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
@@ -11,10 +11,11 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
+  useLoaderData
 } from "@remix-run/react";
 import { getProfile, updateProfile } from "./models/profile.server";
 import { getOptionalSessionUser } from "./session.server";
+import globalStylesheetUrl from "./styles/global.css";
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 
 export const meta: MetaFunction = () => {
@@ -22,7 +23,10 @@ export const meta: MetaFunction = () => {
 };
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+  return [
+    { rel: "stylesheet", href: tailwindStylesheetUrl },
+    { rel: "stylesheet", href: globalStylesheetUrl },
+  ];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -66,7 +70,7 @@ export default function App() {
         <Links />
       </head>
       <body className="text-slate-300/80">
-        <div className="h-full max-w-7xl md:mx-auto">
+        <div className="h-full md:mx-auto md:max-w-7xl">
           <Outlet />
         </div>
         <ScrollRestoration />
