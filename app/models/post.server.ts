@@ -9,7 +9,7 @@ export type Post = {
   created_at: Date;
   updated_at: Date;
   profile_id: string;
-  creator: Pick<Profile, "name"> & Pick<Profile, "avatar_url">;
+  creator: Profile;
 };
 
 export async function getPosts(
@@ -18,7 +18,7 @@ export async function getPosts(
   const query = supabaseAdmin.from<Post>("posts").select(`
       id,
       body,
-      creator:profiles ( name, avatar_url )
+      creator:profiles
     `);
 
   if (clientQuery.userId) {
