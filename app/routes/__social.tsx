@@ -2,7 +2,7 @@ import {
   Outlet,
   useFetcher,
   useNavigate,
-  useTransition,
+  useTransition
 } from "@remix-run/react";
 import {
   BiBell,
@@ -13,7 +13,7 @@ import {
   BiGroup,
   BiHomeCircle,
   BiSearchAlt2,
-  BiUser,
+  BiUser
 } from "react-icons/bi";
 import { FaGoogle } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
@@ -32,15 +32,15 @@ export default function SocialLayout() {
   const user = useOptionalUser();
 
   const profile = useOptionalProfile();
-  const hasUser = user?.role === "authenticated" && profile;
+  const hasUser = user?.role === "authenticated";
 
   const notifications: any[] = [];
   const friends: any[] = [];
 
   return (
-    <div className="flex">
-      <div className="invisible flex w-1/4 items-stretch md:visible">
-        <div className="flex w-full flex-col gap-y-4 p-4">
+    <div className="flex w-full">
+      <div className="hidden md:block md:w-1/4">
+        <div className="flex flex-col gap-y-4 p-4">
           <div>
             <img src="assets/images/logo.png" alt="Suja" className="w-28" />
           </div>
@@ -75,6 +75,8 @@ export default function SocialLayout() {
         <div className="flex flex-col">
           <div className="flex flex-none justify-center align-top">
             <NavBar
+              isAuthenticated={hasUser}
+              fetcher={fetcher}
               items={[
                 {
                   icon: BiHomeCircle,
@@ -136,15 +138,15 @@ export default function SocialLayout() {
           </div>
         </div>
       </div>
-      <div className="invisible flex w-1/4 items-stretch md:visible">
-        <div className=" flex w-full flex-col gap-4 p-4">
+      <div className="hidden md:block md:w-1/4">
+        <div className="flex w-full flex-col gap-4 p-4">
           {hasUser ? (
             <div className="flex items-center justify-between">
               <div className="relative">
                 {notifications.length ? (
                   <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-emerald-500" />
                 ) : null}
-                <button className="rounded-full p-2 hover:bg-slate-200/80">
+                <button className="rounded-full p-2 hover:bg-slate-500/10">
                   <BiBell size="18" className="text-slate-500/80" />
                 </button>
               </div>
@@ -154,7 +156,7 @@ export default function SocialLayout() {
                     key: "my-profile",
                     icon: BiUser,
                     onClick: () => {
-                      navigate(`/u/${profile.id}`);
+                      navigate(`/u/${profile?.id}`);
                     },
                     label: "My Profile",
                   },
@@ -162,8 +164,7 @@ export default function SocialLayout() {
                     key: "logout",
                     icon: FiLogOut,
                     onClick: () => {
-                      const formData = new FormData();
-                      fetcher.submit(formData, {
+                      fetcher.submit(null, {
                         action: "/api/sign-out",
                         method: "post",
                         replace: true,
@@ -173,8 +174,8 @@ export default function SocialLayout() {
                   },
                 ]}
               >
-                <Avatar src={profile.avatar_url} alt="Profile" size={28} />
-                <p className="text-white/80">{profile.name}</p>
+                <Avatar src={profile?.avatar_url ?? ''} alt="Profile" size={28} />
+                <p className="text-white/80">{profile?.name}</p>
                 <BiChevronDown size="18" className="text-white/80" />
               </DropdownMenu>
             </div>
