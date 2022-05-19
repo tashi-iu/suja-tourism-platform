@@ -68,7 +68,7 @@ export default function Posts() {
       </div>
 
       <div className="flex flex-1 flex-col gap-4 py-2 md:gap-8 md:py-8">
-        {posts ? (
+        {fetcher.type === "done" ? (
           posts.length ? (
             posts.map((post) => (
               <PostListItemCard
@@ -87,7 +87,7 @@ export default function Posts() {
             fetcher.state === "idle" ? "opacity-0" : "opacity-100"
           }`}
         >
-          <p className="animate-pulse">Loading...</p>
+          <p className="animate-pulse">...</p>
         </div>
       </div>
     </div>
