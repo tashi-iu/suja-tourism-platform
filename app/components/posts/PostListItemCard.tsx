@@ -48,13 +48,13 @@ export default function PostListItemCard(props: PostListItemCardProps) {
         />
       </div>
       <div className="flex flex-1 flex-col gap-y-1">
-        <div className="flex items-end gap-x-2">
-          <p className="font-semibold text-slate-400/60">{post.creator.name}</p>
-          <p className="text-sm text-slate-400/80">
+        <div className="flex items-baseline gap-x-2">
+          <p className="font-semibold text-slate-400/90">{post.creator.name}</p>
+          <p className="font-semibold text-sm text-slate-400/60">
             {getAgoDate(post.created_at)}
           </p>
         </div>
-        <p className="text-slate-300/80">{post.body}</p>
+        <p className="font-semiboldtext-slate-300/80">{post.body}</p>
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center justify-start gap-x-2">
             <IconButton
