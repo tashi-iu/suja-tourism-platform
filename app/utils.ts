@@ -108,6 +108,7 @@ export function getAgoDate(date: Date): string {
   const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
   const diffWeeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
   const diffMonths = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+  const diffYears = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
   let period: Intl.RelativeTimeFormatUnit;
   let value: number;
   if (diffSeconds < 60) {
@@ -129,7 +130,7 @@ export function getAgoDate(date: Date): string {
     value = diffMonths;
     period = `month`;
   } else {
-    value = diffMonths / 12;
+    value = diffYears;
     period = `year`;
   }
 
