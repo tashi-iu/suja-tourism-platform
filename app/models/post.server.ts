@@ -10,6 +10,11 @@ export type Post = {
   updated_at: Date;
   profile_id: string;
   creator: Profile;
+  total_likes: number;
+  liked: boolean;
+  total_comments: number;
+  total_stars: number;
+  starred: boolean;
 };
 
 export async function getPosts(
@@ -18,21 +23,24 @@ export async function getPosts(
   const query = supabaseAdmin.from<Post>("posts").select(`
       id,
       body,
+      created_at,
       creator:profiles (id, name, avatar_url)
     `);
 
+  let filter = query.order("created_at", {
+    ascending: false,
+  });
+
   if (clientQuery.userId) {
-    query.eq("profile_id", clientQuery.userId);
+    filter = query.eq("profile_id", clientQuery.userId);
   }
 
-  query.range(
+  filter = filter.range(
     clientQuery.page ? 10 * clientQuery.page : 0,
     clientQuery.page ? 10 * clientQuery.page + 10 : 10
   );
 
-  const { data } = await query.order("created_at", {
-    ascending: false,
-  });
+  const { data } = await filter;
 
   return data;
 }
@@ -80,8 +88,10 @@ export async function getPost({
   const { data, error } = await supabaseAdmin
     .from("posts")
     .select("*")
-    .eq("profile_id", userId)
-    .eq("id", id)
+    .match({
+      profile_id: userId,
+      id,
+    })
     .single();
 
   if (!error) {

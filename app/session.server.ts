@@ -193,7 +193,6 @@ export async function authenticated(
 
     return await successFunction(user);
   } catch (error) {
-    console.error(error);
     return failureFunction();
   }
 }

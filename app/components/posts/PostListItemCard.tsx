@@ -1,27 +1,40 @@
+import type { useFetcher } from "@remix-run/react";
+import { useCallback } from "react";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { BiCodeAlt, BiDotsVerticalRounded, BiShareAlt } from "react-icons/bi";
-import { FaLaughSquint } from "react-icons/fa";
 import { MdBlock, MdDelete, MdReport } from "react-icons/md";
 import { RiReplyLine, RiStarLine } from "react-icons/ri";
 import type { Post } from "~/models/post.server";
+import { getAgoDate } from "~/utils";
 import Avatar from "../ui-kit/Avatar";
 import DropdownMenu from "../ui-kit/DropdownMenu";
 import IconButton from "../ui-kit/IconButton";
 
 const reactions = {
-  like: AiFillLike,
+  liked: AiFillLike,
   none: AiOutlineLike,
-  laugh: FaLaughSquint,
 };
 
 type PostListItemCardProps = {
   post: Post;
   isSelfPost: boolean;
   isAuthenticated: boolean;
+  fetcher: ReturnType<typeof useFetcher>;
 };
 
 export default function PostListItemCard(props: PostListItemCardProps) {
-  const { post, isSelfPost, isAuthenticated } = props;
+  const { post, isSelfPost, isAuthenticated, fetcher } = props;
+
+  const toggleLike = useCallback(() => {
+    const formData = new FormData();
+    formData.append("liked", (!post.liked).toString());
+    formData.append("postId", post.id);
+    fetcher.submit(formData, {
+      action: "/like",
+      method: "post",
+    });
+  }, [fetcher, post.id, post.liked]);
+
   return (
     <div
       key={`post-${post.id}`}
@@ -35,15 +48,23 @@ export default function PostListItemCard(props: PostListItemCardProps) {
         />
       </div>
       <div className="flex flex-1 flex-col gap-y-1">
-        <p className="font-semibold text-slate-400/90">{post.creator.name}</p>
+        <div className="flex items-end gap-x-2">
+          <p className="font-semibold text-slate-400/60">{post.creator.name}</p>
+          <p className="text-sm text-slate-400/80">
+            {getAgoDate(post.created_at)}
+          </p>
+        </div>
         <p className="text-slate-300/80">{post.body}</p>
         <div className="flex items-center justify-between pt-1">
-          <IconButton
-            icon={reactions.none}
-            size={24}
-            onClick={() => {}}
-            title="React"
-          />
+          <div className="flex items-center justify-start gap-x-2">
+            <IconButton
+              icon={post.liked ? reactions.liked : reactions.none}
+              size={24}
+              onClick={toggleLike}
+              title="React"
+            />
+            <p>{post.total_likes}</p>
+          </div>
           <IconButton
             icon={RiStarLine}
             size={24}

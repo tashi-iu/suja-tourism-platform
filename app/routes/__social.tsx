@@ -64,7 +64,7 @@ export default function SocialLayout() {
                     </div>
                   ))
                 ) : (
-                  <p>Add a friend.</p>
+                  <p>You have no conversations at the moment.</p>
                 )}
               </div>
             </div>
@@ -105,9 +105,9 @@ export default function SocialLayout() {
                 },
                 {
                   icon: MdTour,
-                  key: "tours",
-                  name: "Tours",
-                  to: "/tours",
+                  key: "business",
+                  name: "Business",
+                  to: "/business",
                 },
                 {
                   icon: BiCalendarEvent,
@@ -174,7 +174,11 @@ export default function SocialLayout() {
                   },
                 ]}
               >
-                <Avatar src={profile?.avatar_url ?? ''} alt="Profile" size={28} />
+                <Avatar
+                  src={profile?.avatar_url ?? ""}
+                  alt="Profile"
+                  size={28}
+                />
                 <p className="text-white/80">{profile?.name}</p>
                 <BiChevronDown size="18" className="text-white/80" />
               </DropdownMenu>
