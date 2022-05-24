@@ -1,8 +1,8 @@
 import {
   Outlet,
+  useCatch,
   useFetcher,
-  useNavigate,
-  useTransition
+  useNavigate, useTransition
 } from "@remix-run/react";
 import {
   BiBell,
@@ -25,6 +25,16 @@ import NavBar from "~/components/ui-kit/NavBar";
 import SearchInput from "~/components/ui-kit/SearchInput";
 import { useOptionalProfile, useOptionalUser } from "~/utils";
 
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <div>
+      <h2>Oops! An error occured with the status {caught.status}: {caught.statusText}</h2>
+      <p>{caught.data}</p>
+    </div>
+  );
+}
+
 export default function SocialLayout() {
   const transition = useTransition();
   const navigate = useNavigate();
@@ -42,7 +52,7 @@ export default function SocialLayout() {
       <div className="hidden md:block md:w-1/4">
         <div className="flex flex-col gap-y-4 p-4">
           <div>
-            <img src="assets/images/logo.png" alt="Suja" className="w-28" />
+            <img src="/assets/images/logo.png" alt="Suja" className="w-28" />
           </div>
           <SearchInput placeholder="Search" />
           {hasUser ? (

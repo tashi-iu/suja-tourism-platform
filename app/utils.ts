@@ -20,7 +20,7 @@ export function useOptionalUser(): User | null {
   return data?.user ?? null;
 }
 
-export function useUser(): User | null {
+export function useUser(): User {
   const maybeUser = useOptionalUser();
   if (!maybeUser) {
     throw new Error(

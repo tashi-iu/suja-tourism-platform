@@ -6,6 +6,7 @@ export type Profile = {
   avatar_url: string;
   id: string;
   role: string;
+  location: string;
 };
 
 export async function getProfile(

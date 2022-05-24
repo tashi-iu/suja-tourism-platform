@@ -1,4 +1,5 @@
 import type { useFetcher } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { useCallback } from "react";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { BiCodeAlt, BiDotsVerticalRounded, BiShareAlt } from "react-icons/bi";
@@ -41,20 +42,26 @@ export default function PostListItemCard(props: PostListItemCardProps) {
       className="shadow-stone-700/15 flex cursor-pointer gap-x-2 rounded-xl bg-stone-700/40 p-4 shadow-xl transition duration-150 ease-in-out hover:bg-stone-700/30"
     >
       <div className="pt-1">
-        <Avatar
-          src={post.creator.avatar_url}
-          alt="Post creator's profile"
-          size={38}
-        />
+        <Link to={`/u/${post.creator.id}`}>
+          <Avatar
+            src={post.creator.avatar_url}
+            alt="Post creator's profile"
+            size={38}
+          />
+        </Link>
       </div>
       <div className="flex flex-1 flex-col gap-y-1">
-        <div className="flex items-baseline gap-x-2">
-          <p className="font-semibold text-slate-400/90">{post.creator.name}</p>
-          <p className="font-semibold text-sm text-slate-400/60">
+        <div className="flex items-baseline gap-x-1">
+          <Link to={`/u/${post.creator.id}`}>
+            <p className="font-semibold text-slate-400/90">
+              {post.creator.name}
+            </p>
+          </Link>
+          <p className="text-sm font-semibold text-slate-400/60">
             {getAgoDate(post.created_at)}
           </p>
         </div>
-        <p className="font-semiboldtext-slate-300/80">{post.body}</p>
+        <p>{post.body}</p>
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center justify-start gap-x-2">
             <IconButton

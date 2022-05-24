@@ -40,9 +40,7 @@ export async function getPosts(
     clientQuery.page ? 10 * clientQuery.page + 10 : 10
   );
 
-  const { data } = await filter;
-
-  return data;
+  return filter;
 }
 
 export async function createPost({
@@ -104,4 +102,20 @@ export async function getPost({
   }
 
   return null;
+}
+
+export async function getPostCountForUser(userId: string) {
+  const { count, error } = await supabaseAdmin
+    .from("posts")
+    .select(undefined, {
+      count: "exact",
+      head: true,
+    })
+    .match({
+      profile_id: userId,
+    });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return count ?? 0;
 }

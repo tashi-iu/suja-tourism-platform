@@ -31,7 +31,7 @@ export default function NavBar({
   return (
     <div>
       <div className="sticky top-0 flex w-screen items-center justify-between py-2.5 px-4 md:hidden">
-        <img src="assets/images/logo.png" alt="Suja" className="w-20" />
+        <img src="/assets/images/logo.png" alt="Suja" className="w-20" />
         <DropdownMenu
           items={[
             ...menuItems.map((item) => ({
