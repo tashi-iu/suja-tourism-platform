@@ -12,7 +12,7 @@ export type Like = {
 export async function getLikeCount(clientQuery: { postId: Like["post_id"] }) {
   const query = supabaseAdmin
     .from<Like>("likes")
-    .select(undefined, { head: true, count: "exact" })
+    .select(undefined, { head: true, count: "estimated" })
     .match({
       post_id: clientQuery.postId,
     });
@@ -29,7 +29,7 @@ export async function getHasUserLiked(clientQuery: {
   const query = supabaseAdmin
     .from<Like>("likes")
     .select('profile_id, post_id', {
-      count: "exact",
+      count: "estimated",
       head: true,
     })
     .match({
