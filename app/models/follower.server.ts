@@ -35,7 +35,7 @@ export async function getFollowerCount(followingId: string) {
   const { count, error } = await supabaseAdmin
     .from<Follower>("followers")
     .select(undefined, {
-      count: "estimated",
+      count: "exact",
       head: true,
     })
     .filter("following_id", "eq", followingId);
@@ -47,7 +47,7 @@ export async function getFollowingCount(followerId: string) {
   const { count, error } = await supabaseAdmin
     .from<Follower>("followers")
     .select(undefined, {
-      count: "estimated",
+      count: "exact",
       head: true,
     })
     .filter("follower_id", "eq", followerId);
@@ -62,7 +62,7 @@ export async function checkUserFollowing(
   const { count, error } = await supabaseAdmin
     .from<Follower>("followers")
     .select(undefined, {
-      count: "estimated",
+      count: "exact",
       head: true,
     })
     .match({

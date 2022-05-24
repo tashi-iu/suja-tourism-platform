@@ -108,7 +108,7 @@ export async function getPostCountForUser(userId: string) {
   const { count, error } = await supabaseAdmin
     .from("posts")
     .select(undefined, {
-      count: "estimated",
+      count: "exact",
       head: true,
     })
     .match({

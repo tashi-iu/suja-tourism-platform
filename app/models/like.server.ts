@@ -29,7 +29,7 @@ export async function getHasUserLiked(clientQuery: {
   const query = supabaseAdmin
     .from<Like>("likes")
     .select('profile_id, post_id', {
-      count: "estimated",
+      count: "exact",
       head: true,
     })
     .match({
