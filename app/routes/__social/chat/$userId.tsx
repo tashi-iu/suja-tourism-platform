@@ -100,10 +100,14 @@ export default function Chat() {
   const fetcher = useFetcher();
 
   const messageFormRef = useRef<HTMLFormElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   useEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current?.scrollHeight,
+    });
     const subscription = supabaseClient
       .from(`messages:sender_id=eq.${receipient.id}`)
       .on("INSERT", (payload) => {
@@ -129,8 +133,11 @@ export default function Chat() {
         <Avatar src={receipient.avatar_url} alt="User profile" size={32} />
         <p>{receipient.name}</p>
       </div>
-      <div className="h-[75vh] overflow-y-auto rounded-md bg-stone-300/5 p-4">
-        <div className="flex h-full flex-col justify-end gap-y-2">
+      <div
+        ref={scrollRef}
+        className="h-[75vh] overflow-y-auto rounded-md bg-stone-300/5 p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600"
+      >
+        <div className="flex min-h-[70vh] flex-col justify-end gap-y-2">
           {messages?.map((message) => (
             <div
               key={message.id}
