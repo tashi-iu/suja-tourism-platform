@@ -83,7 +83,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   return json(
     {
       receipient,
-      messages,
+      messages: messages ?? [],
     },
     {
       headers: session && {
