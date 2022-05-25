@@ -41,7 +41,7 @@ export default function AuthCallback() {
       formData.append("redirectTo", searchParams.get("redirectTo") || "/");
 
       fetcher.submit(formData, { method: "post" });
-    }, 1000);
+    }, 2000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher]);
 
