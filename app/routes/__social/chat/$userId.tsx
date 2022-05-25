@@ -1,7 +1,7 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Avatar from "~/components/ui-kit/Avatar";
 import IconButton from "~/components/ui-kit/IconButton";
@@ -126,6 +126,12 @@ export default function Chat() {
       messageFormRef.current?.reset();
     }
   }, [fetcher.data]);
+
+  useLayoutEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current?.scrollHeight,
+    });
+  }, [scrollRef.current?.scrollHeight]);
 
   return (
     <div className="p-4">
