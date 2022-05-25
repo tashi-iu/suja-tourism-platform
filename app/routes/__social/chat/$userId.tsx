@@ -130,7 +130,7 @@ export default function Chat() {
         <p>{receipient.name}</p>
       </div>
       <div className="h-[75vh] overflow-y-auto rounded-md bg-stone-300/5 p-4">
-        <div className="flex flex-col justify-end gap-y-2">
+        <div className="flex h-full flex-col justify-end gap-y-2">
           {messages?.map((message) => (
             <div
               key={message.id}
