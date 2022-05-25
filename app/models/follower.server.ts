@@ -57,7 +57,7 @@ export async function getFollowingCount(followerId: string) {
 
 export async function checkUserFollowing(
   followerId: string,
-  followingId: string,
+  followingId: string
 ) {
   const { count, error } = await supabaseAdmin
     .from<Follower>("followers")
@@ -71,4 +71,20 @@ export async function checkUserFollowing(
     });
   if (error?.message) throw new Error(error.message);
   return (count ?? 0) > 0;
+}
+
+export async function searchMutualFollowers(
+  followerId: string,
+  searchQuery: string
+) {
+  const { data, error } = await supabaseAdmin
+    .from("followers")
+    .select("follower_id, following_id")
+    .filter("follower_id", "eq", followerId)
+    .select("follower:profiles!following_id!inner(*)")
+    .textSearch("profiles.name", `${searchQuery.trim().replace(/ +/g, "&")}:*`)
+    .limit(10);
+  if (error?.message) throw new Error(error.message);
+
+  return data;
 }

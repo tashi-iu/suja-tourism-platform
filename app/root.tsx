@@ -14,6 +14,7 @@ import {
   useLoaderData
 } from "@remix-run/react";
 import { getProfile, updateProfile } from "./models/profile.server";
+import { authCookie } from "./services/supabase.server";
 import { getOptionalSessionUser } from "./session.server";
 import globalStylesheetUrl from "./styles/global.css";
 import tailwindStylesheetUrl from "./styles/tailwind.css";
@@ -30,7 +31,7 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const user = await getOptionalSessionUser(request);
+  const { user, session } = await getOptionalSessionUser(request);
   let profile;
   if (user) {
     profile = (await getProfile(user.id))?.data;
@@ -48,14 +49,21 @@ export const loader: LoaderFunction = async ({ request }) => {
       profile = data;
     }
   }
-  return json({
-    user,
-    profile,
-    ENV: {
-      SUPABASE_URL: process.env.SUPABASE_URL,
-      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+  return json(
+    {
+      user,
+      profile,
+      ENV: {
+        SUPABASE_URL: process.env.SUPABASE_URL,
+        SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+      },
     },
-  });
+    {
+      headers: session && {
+        "Set-Cookie": await authCookie.commitSession(session),
+      },
+    }
+  );
 };
 
 export default function App() {

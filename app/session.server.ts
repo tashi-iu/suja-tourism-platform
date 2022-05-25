@@ -91,6 +91,7 @@ export async function signOutUser(
 
 type GetUserReturn = {
   user?: User;
+  session?: Session;
 } & SupabaseError;
 export async function getUserByAccessToken(
   accessToken: string
@@ -112,15 +113,15 @@ export async function getUserByAccessToken(
 
 export async function getOptionalSessionUser(
   request: Request
-): Promise<User | null> {
+): Promise<Omit<GetUserReturn, "error">> {
   try {
-    const { user, error } = await getSessionUser(request);
+    const { user, error, session } = await getSessionUser(request);
 
-    if (!user || error) return null;
+    if (!user || error) return {};
 
-    return user;
+    return { user, session };
   } catch (error) {
-    return null;
+    return {};
   }
 }
 
@@ -149,7 +150,7 @@ export async function getSessionUser(request: Request): Promise<GetUserReturn> {
       return { error: accessTokenError ?? noUserError };
     }
 
-    return { user };
+    return { user, session };
   } catch (error) {
     return { error: typeof error === "string" ? error : noUserError };
   }

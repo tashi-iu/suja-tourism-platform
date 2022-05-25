@@ -7,6 +7,7 @@ import Avatar from "~/components/ui-kit/Avatar";
 import { checkUserFollowing } from "~/models/follower.server";
 import type { Profile } from "~/models/profile.server";
 import { getProfile } from "~/models/profile.server";
+import { authCookie } from "~/services/supabase.server";
 import { getOptionalSessionUser } from "~/session.server";
 import { useOptionalUser } from "~/utils";
 import type { ProfileMetrics } from "~/utils.server";
@@ -26,19 +27,26 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const userMetrics = await getUserMetrics(userId);
 
-  const sessionUser = await getOptionalSessionUser(request);
+  const { user: sessionUser, session } = await getOptionalSessionUser(request);
 
   const isUserFollowing =
     sessionUser && (await checkUserFollowing(sessionUser.id, userId));
 
   const posts = await loadPosts(request, params);
 
-  return json({
-    user,
-    posts,
-    userMetrics,
-    isUserFollowing,
-  });
+  return json(
+    {
+      user,
+      posts,
+      userMetrics,
+      isUserFollowing,
+    },
+    {
+      headers: session && {
+        "Set-Cookie": await authCookie.commitSession(session),
+      },
+    }
+  );
 };
 
 export default function User() {

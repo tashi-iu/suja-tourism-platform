@@ -4,7 +4,7 @@ import { createElement } from "react";
 type IconButtonProps = {
   icon: FunctionComponent<any>;
   size: number;
-  onClick: VoidFunction;
+  onClick?: VoidFunction;
   title: string;
 };
 

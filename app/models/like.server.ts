@@ -28,7 +28,7 @@ export async function getHasUserLiked(clientQuery: {
 }) {
   const query = supabaseAdmin
     .from<Like>("likes")
-    .select('profile_id, post_id', {
+    .select("profile_id, post_id", {
       count: "exact",
       head: true,
     })
@@ -36,7 +36,7 @@ export async function getHasUserLiked(clientQuery: {
       profile_id: clientQuery.userId,
       post_id: clientQuery.postId,
     });
-  
+
   const { count } = await query;
   return !!count;
 }
@@ -64,12 +64,13 @@ export async function updatePostLiked(clientQuery: {
         post_id: clientQuery.postId,
         profile_id: clientQuery.userId,
       });
-  const { error } = await filter.match({
-    post_id: clientQuery.postId,
-    profile_id: clientQuery.userId,
-  }).single();
+  const { error } = await filter
+    .match({
+      post_id: clientQuery.postId,
+      profile_id: clientQuery.userId,
+    })
+    .single();
   if (error) {
-    console.error(error);
     throw new Error(error.message);
   }
   return {
