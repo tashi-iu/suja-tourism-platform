@@ -7,6 +7,7 @@ export type Profile = {
   id: string;
   role: string;
   location: string;
+  email: string;
 };
 
 export async function getProfile(
@@ -16,14 +17,17 @@ export async function getProfile(
 }
 
 export async function updateProfile(
-  userId: string,
-  profile: Omit<Partial<Profile>, "id">
+  profile: Partial<Profile>
 ) {
   return supabaseAdmin
     .from("profiles")
-    .update(profile)
+    .upsert({
+      ...profile,
+    }, {
+      onConflict: 'id',
+    })
     .match({
-      id: userId,
+      id: profile.id,
     })
     .single();
 }

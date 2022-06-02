@@ -10,7 +10,8 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration, useLoaderData
+  ScrollRestoration,
+  useLoaderData
 } from "@remix-run/react";
 import { setUserPresence } from "./models/presence.server";
 import { getProfile, updateProfile } from "./models/profile.server";
@@ -36,10 +37,12 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (user) {
     profile = (await getProfile(user.id))?.data;
     if (!profile?.name || !profile?.role || !profile?.avatar_url) {
-      const { data, error, status } = await updateProfile(user.id, {
+      const { data, error, status } = await updateProfile({
+        id: user.id,
         avatar_url: user.user_metadata.avatar_url,
         name: user.user_metadata.full_name,
         role: "user",
+        email: user.email,
       });
       if (error) {
         throw new Response(error.message, {
