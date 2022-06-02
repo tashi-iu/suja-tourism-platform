@@ -18,15 +18,12 @@ export const loadPosts = async (
     userId: urlParams?.userId ?? params.get("userId") ?? undefined,
   });
   if (error || !posts)
-    throw new Response(
-      error?.message || "Could not fetch posts",
-      {
-        status: 500,
-        headers: session && {
-          "Set-Cookie": await authCookie.commitSession(session),
-        },
-      }
-    );
+    throw new Response(error?.message || "Could not fetch posts", {
+      status: 500,
+      headers: session && {
+        "Set-Cookie": await authCookie.commitSession(session),
+      },
+    });
   for (let post of posts) {
     post.total_likes = (await getLikeCount({ postId: post.id })) ?? 0;
     post.liked =

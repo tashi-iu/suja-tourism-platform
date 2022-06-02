@@ -10,15 +10,17 @@ import {
   getMessagesForConversation,
   sendMessage
 } from "~/models/message.server";
+import type { PresenceResponse } from "~/models/presence.server";
+import { getUserPresence } from "~/models/presence.server";
 import type { Profile } from "~/models/profile.server";
 import { getProfile } from "~/models/profile.server";
 import { supabaseClient } from "~/services/supabase.client";
 import { authCookie } from "~/services/supabase.server";
 import { getSessionUser } from "~/session.server";
-import { useProfile } from "~/utils";
+import { getAgoDate, getPresenceWithStatus, useProfile } from "~/utils";
 
 type LoaderData = {
-  receipient: Profile;
+  receipient: Profile & { presence: PresenceResponse };
   messages: Message[];
 };
 
@@ -80,9 +82,14 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     receipientId
   );
 
+  const { data: presence } = await getUserPresence(receipientId);
+
   return json(
     {
-      receipient,
+      receipient: {
+        ...receipient,
+        presence,
+      },
       messages: messages ?? [],
     },
     {
@@ -95,27 +102,61 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 export default function Chat() {
   const user = useProfile();
-  const { receipient, messages: initialMessages } = useLoaderData<LoaderData>();
+  const { receipient: initialReceipient, messages: initialMessages } =
+    useLoaderData<LoaderData>();
 
   const fetcher = useFetcher();
 
   const messageFormRef = useRef<HTMLFormElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const statusIntervalRef = useRef<NodeJS.Timer | null>(null);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [receipient, setReceipient] = useState<PresenceResponse>(
+    initialReceipient?.presence
+  );
 
-  useEffect(() => {
+  const [isAtEnd, setIsAtEnd] = useState(true);
+
+  const resolveReceipientStatus = (presence: PresenceResponse) => {
+    setReceipient(getPresenceWithStatus(presence));
+    if (statusIntervalRef.current) {
+      clearInterval(statusIntervalRef.current);
+    }
+    statusIntervalRef.current = setInterval(() => {
+      setReceipient(getPresenceWithStatus(presence));
+    }, 3000);
+  };
+
+  const scrollToBottom = () => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current?.scrollHeight,
     });
-    const subscription = supabaseClient
-      .from(`messages:sender_id=eq.${receipient.id}`)
+  };
+
+  useEffect(() => {
+    const messagesSubscription = supabaseClient
+      .from(`messages:sender_id=eq.${initialReceipient.id}`)
       .on("INSERT", (payload) => {
         setMessages((messages) => [...messages, payload.new]);
+        const isAtEnd =
+          scrollRef.current?.scrollHeight === scrollRef.current?.scrollTop;
+        setIsAtEnd(isAtEnd);
       })
       .subscribe();
+    resolveReceipientStatus(initialReceipient.presence);
+    const statusSubscription = supabaseClient
+      .from<PresenceResponse>(`presences:profile_id=eq.${initialReceipient.id}`)
+      .on("INSERT", (payload) => resolveReceipientStatus(payload.new))
+      .on("UPDATE", (payload) => resolveReceipientStatus(payload.new))
+      .subscribe();
+
     return () => {
-      subscription.unsubscribe();
+      messagesSubscription.unsubscribe();
+      statusSubscription.unsubscribe();
+      if (statusIntervalRef.current) {
+        clearInterval(statusIntervalRef.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -124,24 +165,48 @@ export default function Chat() {
     if (fetcher.data?.done && fetcher.data.message) {
       setMessages((messages) => [...messages, fetcher.data.message]);
       messageFormRef.current?.reset();
+      const isAtEnd =
+        scrollRef.current?.scrollHeight === scrollRef.current?.scrollTop;
+      setIsAtEnd(isAtEnd);
     }
   }, [fetcher.data]);
 
   useLayoutEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current?.scrollHeight,
-    });
-  }, [scrollRef.current?.scrollHeight]);
+    scrollToBottom();
+  }, [isAtEnd]);
 
   return (
     <div className="p-4">
       <div className="flex items-center gap-x-4 py-4">
-        <Avatar src={receipient.avatar_url} alt="User profile" size={32} />
-        <p>{receipient.name}</p>
+        <Avatar
+          src={initialReceipient.avatar_url}
+          alt="User profile"
+          size={32}
+        />
+        <div className="flex flex-col">
+          <p>{initialReceipient.name}</p>
+          <div className="flex items-center gap-x-2">
+            <span
+              className={`h-3 w-3 rounded-full ${
+                receipient?.status === "online"
+                  ? "bg-green-500"
+                  : "border border-stone-500/60"
+              }`}
+            />
+            {receipient && (
+              <p className="text-stone-500/60">
+                {receipient?.status === "online"
+                  ? "Online"
+                  : `Last seen: ${getAgoDate(receipient.last_seen)}`}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
+
       <div
         ref={scrollRef}
-        className="h-[75vh] overflow-y-auto rounded-md bg-stone-300/5 p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600"
+        className="h-[75vh] overflow-y-auto scroll-smooth rounded-md bg-stone-300/5 p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600"
       >
         <div className="flex min-h-[70vh] flex-col justify-end gap-y-2">
           {messages?.map((message) => (

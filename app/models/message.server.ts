@@ -40,5 +40,5 @@ export const getMessagesForConversation = (
       `and(sender_id.eq.${userId},receiver_id.eq.${receipientId}),and(sender_id.eq.${receipientId},receiver_id.eq.${userId})`
     )
     .limit(10)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
 };

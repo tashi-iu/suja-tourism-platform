@@ -3,6 +3,7 @@ import type { Provider, User } from "@supabase/supabase-js";
 import type { RefObject } from "react";
 import { useEffect, useMemo } from "react";
 import { supabaseClient } from "~/services/supabase.client";
+import type { PresenceResponse } from "./models/presence.server";
 import type { Profile } from "./models/profile.server";
 
 export function useMatchesData(id: string) {
@@ -136,3 +137,18 @@ export function getAgoDate(date: Date): string {
 
   return relativeTimeFormat.format(-value, period);
 }
+
+export const getPresenceWithStatus = (
+  presence: PresenceResponse
+): PresenceResponse => {
+  const limitTime = new Date(Date.now() - 2 * 60 * 1000);
+  const isOnline =
+    !presence?.forced_offline &&
+    presence?.last_seen &&
+    new Date(presence?.last_seen).getTime() > limitTime.getTime();
+
+  return {
+    ...presence,
+    status: isOnline ? "online" : "offline",
+  };
+};

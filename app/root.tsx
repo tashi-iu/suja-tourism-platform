@@ -10,9 +10,9 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration,
-  useLoaderData
+  ScrollRestoration, useLoaderData
 } from "@remix-run/react";
+import { setUserPresence } from "./models/presence.server";
 import { getProfile, updateProfile } from "./models/profile.server";
 import { authCookie } from "./services/supabase.server";
 import { getOptionalSessionUser } from "./session.server";
@@ -20,7 +20,7 @@ import globalStylesheetUrl from "./styles/global.css";
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 
 export const meta: MetaFunction = () => {
-  return { title: "Suja", description: "A Bhutansese social tourism platform" };
+  return { title: "Suja", description: "The social tourism platform" };
 };
 
 export const links: LinksFunction = () => {
@@ -48,6 +48,11 @@ export const loader: LoaderFunction = async ({ request }) => {
       }
       profile = data;
     }
+    await setUserPresence({
+      last_seen: new Date(),
+      forced_offline: false,
+      profile_id: profile.id,
+    });
   }
   return json(
     {

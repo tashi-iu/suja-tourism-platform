@@ -1,5 +1,5 @@
 import type { ActionFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { Link, useFetcher } from "@remix-run/react";
 import { useCallback } from "react";
 import Avatar from "~/components/ui-kit/Avatar";
@@ -12,8 +12,14 @@ import { getSessionUser } from "~/session.server";
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const { user, session, error } = await getSessionUser(request);
-  if (!user || error)
-    throw new Response(error ?? "You are unauthorized", { status: 401 });
+  if (!user || error) {
+    const session = await authCookie.getSession(request.headers.get("Cookie"));
+    return redirect("/", {
+      headers: {
+        "Set-Cookie": await authCookie.destroySession(session),
+      },
+    });
+  }
   const query = formData.get("query") as string;
   if (!query)
     return {
