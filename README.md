@@ -4,7 +4,6 @@
 
 _A social media platform where users can plan trips and share their experiences, while businesses get a platform to provide their services. Made with 💜 in [Remix](https://github.com/remix-run/remix) ([K-pop Stack](https://github.com/netlify-templates/kpop-stack))._
 
-
 ---
 
 ## Features
@@ -13,8 +12,6 @@ _A social media platform where users can plan trips and share their experiences,
 - Chat
 - Planner
 - Business accounts
-
-
 
 ## Development
 
@@ -25,11 +22,15 @@ _A social media platform where users can plan trips and share their experiences,
 - [Supabase CLI](https://supabase.com/docs/guides/local-development)
 - [Docker](https://www.docker.com/products/docker-desktop)
 
+### Setup
+
 - Install dependencies:
 
   ```sh
   npm install
   ```
+
+- Refer [.env.sample](./.env.sample) and set all the variables in a `.env` file.
 
 - Initialize Netlify
 
