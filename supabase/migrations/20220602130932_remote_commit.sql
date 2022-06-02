@@ -3,6 +3,122 @@
 -- and may require manual changes to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps.
 
+CREATE TABLE IF NOT EXISTS public.profiles
+(
+    id uuid NOT NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    email text COLLATE pg_catalog."default",
+    avatar_url text COLLATE pg_catalog."default",
+    name text COLLATE pg_catalog."default",
+    role text COLLATE pg_catalog."default",
+    CONSTRAINT profiles_pkey PRIMARY KEY (id),
+    CONSTRAINT profiles_id_fkey FOREIGN KEY (id)
+        REFERENCES auth.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.profiles
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public.profiles
+    ENABLE ROW LEVEL SECURITY;
+
+GRANT ALL ON TABLE public.profiles TO authenticated;
+
+GRANT ALL ON TABLE public.profiles TO postgres;
+
+GRANT ALL ON TABLE public.profiles TO anon;
+
+GRANT ALL ON TABLE public.profiles TO service_role;
+
+COMMENT ON TABLE public.profiles
+    IS 'User profiles';
+CREATE POLICY "Only user of the profile can delete "
+    ON public.profiles
+    AS PERMISSIVE
+    FOR DELETE
+    TO public
+    USING ((auth.uid() = id));
+CREATE POLICY "Public profiles are viewable by everyone."
+    ON public.profiles
+    AS PERMISSIVE
+    FOR SELECT
+    TO public
+    USING (true);
+CREATE POLICY "Users can insert their own profile."
+    ON public.profiles
+    AS PERMISSIVE
+    FOR INSERT
+    TO public
+    WITH CHECK ((auth.uid() = id));
+CREATE POLICY "Users can update own profile."
+    ON public.profiles
+    AS PERMISSIVE
+    FOR UPDATE
+    TO public
+    USING ((auth.uid() = id));
+
+CREATE TABLE IF NOT EXISTS public.posts
+(
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    created_at timestamp with time zone DEFAULT now(),
+    body text COLLATE pg_catalog."default" DEFAULT ''::text,
+    updated_at timestamp with time zone,
+    profile_id uuid NOT NULL,
+    image_urls text[] COLLATE pg_catalog."default",
+    CONSTRAINT posts_pkey PRIMARY KEY (id),
+    CONSTRAINT posts_profile_id_fkey FOREIGN KEY (profile_id)
+        REFERENCES public.profiles (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.posts
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public.posts
+    ENABLE ROW LEVEL SECURITY;
+
+GRANT ALL ON TABLE public.posts TO authenticated;
+
+GRANT ALL ON TABLE public.posts TO postgres;
+
+GRANT ALL ON TABLE public.posts TO anon;
+
+GRANT ALL ON TABLE public.posts TO service_role;
+
+COMMENT ON TABLE public.posts
+    IS 'User posts';
+CREATE POLICY "Allow only the post creator to update the post."
+    ON public.posts
+    AS PERMISSIVE
+    FOR UPDATE
+    TO public
+    USING ((auth.uid() = profile_id));
+CREATE POLICY "Only current user can delete their post"
+    ON public.posts
+    AS PERMISSIVE
+    FOR DELETE
+    TO public
+    USING ((auth.uid() = profile_id));
+CREATE POLICY "Users can create posts for themselves"
+    ON public.posts
+    AS PERMISSIVE
+    FOR INSERT
+    TO public
+    WITH CHECK ((auth.uid() = profile_id));
+CREATE POLICY "Viewable by everyone"
+    ON public.posts
+    AS PERMISSIVE
+    FOR SELECT
+    TO public
+    USING (true);
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
     RETURNS trigger
     LANGUAGE 'plpgsql'
@@ -93,64 +209,6 @@ CREATE POLICY "Only current user can update their like"
     FOR UPDATE
     TO public
     USING ((auth.uid() = profile_id));
-
-CREATE TABLE IF NOT EXISTS public.posts
-(
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    created_at timestamp with time zone DEFAULT now(),
-    body text COLLATE pg_catalog."default" DEFAULT ''::text,
-    updated_at timestamp with time zone,
-    profile_id uuid NOT NULL,
-    image_urls text[] COLLATE pg_catalog."default",
-    CONSTRAINT posts_pkey PRIMARY KEY (id),
-    CONSTRAINT posts_profile_id_fkey FOREIGN KEY (profile_id)
-        REFERENCES public.profiles (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.posts
-    OWNER to postgres;
-
-ALTER TABLE IF EXISTS public.posts
-    ENABLE ROW LEVEL SECURITY;
-
-GRANT ALL ON TABLE public.posts TO authenticated;
-
-GRANT ALL ON TABLE public.posts TO postgres;
-
-GRANT ALL ON TABLE public.posts TO anon;
-
-GRANT ALL ON TABLE public.posts TO service_role;
-
-COMMENT ON TABLE public.posts
-    IS 'User posts';
-CREATE POLICY "Allow only the post creator to update the post."
-    ON public.posts
-    AS PERMISSIVE
-    FOR UPDATE
-    TO public
-    USING ((auth.uid() = profile_id));
-CREATE POLICY "Only current user can delete their post"
-    ON public.posts
-    AS PERMISSIVE
-    FOR DELETE
-    TO public
-    USING ((auth.uid() = profile_id));
-CREATE POLICY "Users can create posts for themselves"
-    ON public.posts
-    AS PERMISSIVE
-    FOR INSERT
-    TO public
-    WITH CHECK ((auth.uid() = profile_id));
-CREATE POLICY "Viewable by everyone"
-    ON public.posts
-    AS PERMISSIVE
-    FOR SELECT
-    TO public
-    USING (true);
 
 CREATE TABLE IF NOT EXISTS public.presences
 (
@@ -306,73 +364,3 @@ CREATE POLICY "Only sender can update their message"
     FOR UPDATE
     TO public
     USING ((auth.uid() = sender_id));
-
-CREATE TABLE IF NOT EXISTS public.profiles
-(
-    id uuid NOT NULL,
-    created_at timestamp with time zone NOT NULL DEFAULT now(),
-    email text COLLATE pg_catalog."default",
-    avatar_url text COLLATE pg_catalog."default",
-    name text COLLATE pg_catalog."default",
-    role text COLLATE pg_catalog."default",
-    CONSTRAINT profiles_pkey PRIMARY KEY (id),
-    CONSTRAINT profiles_id_fkey FOREIGN KEY (id)
-        REFERENCES auth.users (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.profiles
-    OWNER to postgres;
-
-ALTER TABLE IF EXISTS public.profiles
-    ENABLE ROW LEVEL SECURITY;
-
-GRANT ALL ON TABLE public.profiles TO authenticated;
-
-GRANT ALL ON TABLE public.profiles TO postgres;
-
-GRANT ALL ON TABLE public.profiles TO anon;
-
-GRANT ALL ON TABLE public.profiles TO service_role;
-
-COMMENT ON TABLE public.profiles
-    IS 'User profiles';
-CREATE POLICY "Only user of the profile can delete "
-    ON public.profiles
-    AS PERMISSIVE
-    FOR DELETE
-    TO public
-    USING ((auth.uid() = id));
-CREATE POLICY "Public profiles are viewable by everyone."
-    ON public.profiles
-    AS PERMISSIVE
-    FOR SELECT
-    TO public
-    USING (true);
-CREATE POLICY "Users can insert their own profile."
-    ON public.profiles
-    AS PERMISSIVE
-    FOR INSERT
-    TO public
-    WITH CHECK ((auth.uid() = id));
-CREATE POLICY "Users can update own profile."
-    ON public.profiles
-    AS PERMISSIVE
-    FOR UPDATE
-    TO public
-    USING ((auth.uid() = id));
-
-DROP FUNCTION IF EXISTS graphql.build_update(ast jsonb, variable_definitions jsonb, variables jsonb, parent_type text, parent_block_name text);
-
-DROP FUNCTION IF EXISTS graphql.cache_key(role regrole, ast jsonb, variables jsonb);
-
-DROP FUNCTION IF EXISTS graphql.build_insert(ast jsonb, variable_definitions jsonb, variables jsonb, parent_type text);
-
-DROP FUNCTION IF EXISTS graphql.build_delete(ast jsonb, variable_definitions jsonb, variables jsonb, parent_type text, parent_block_name text);
-
-DROP TABLE IF EXISTS graphql._type CASCADE;
-
-DROP TABLE IF EXISTS graphql._field CASCADE;
